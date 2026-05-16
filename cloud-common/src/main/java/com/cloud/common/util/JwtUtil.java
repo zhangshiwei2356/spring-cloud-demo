@@ -4,6 +4,7 @@ import com.cloud.common.exception.GlobalException;
 import com.cloud.common.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
@@ -63,9 +64,18 @@ public class JwtUtil {
         String secret = jwtProperties.getSecret();
         byte[] keyBytes;
         try {
-            keyBytes = Decoders.BASE64.decode(secret);
-        } catch (IllegalArgumentException ex) {
+            keyBytes = Decoders.BASE64.decode(secret.trim());
+        } catch (IllegalArgumentException | DecodingException ex) {
+            /* 演示 YAML 为 UTF-8 明文（含 '-' 等字符会被误判为 Base64 片段后解码失败） */
             keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        }
+        if (keyBytes.length < 32) {
+            try {
+                java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+                keyBytes = digest.digest(secret.getBytes(StandardCharsets.UTF_8));
+            } catch (java.security.NoSuchAlgorithmException e) {
+                throw new GlobalException("JWT 密钥不可用");
+            }
         }
         return Keys.hmacShaKeyFor(keyBytes);
     }
