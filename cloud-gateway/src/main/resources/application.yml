@@ -13,6 +13,8 @@ gateway:
 spring:
   application:
     name: cloud-gateway
+  codec:
+    max-in-memory-size: 10MB
   cloud:
     nacos:
       discovery:
@@ -55,6 +57,11 @@ cloud:
       secret: cloud-demo-jwt-signing-secret-min-32-bytes-required-for-hs256-xx
       issuer: cloud-auth
       access-token-ttl-seconds: 7200
+  gateway:
+    archive:
+      # 档案与上传文件目录（相对网关启动工作目录）
+      upload-dir: ./data/archives
+      max-file-size: 10485760
 
 management:
   endpoints:

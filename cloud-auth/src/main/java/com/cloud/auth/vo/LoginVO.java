@@ -13,6 +13,14 @@ public class LoginVO implements Serializable {
     private String accessToken;
     @Schema(description = "过期秒数")
     private long expireInSeconds;
+    @Schema(description = "用户ID")
+    private Long userId;
+    @Schema(description = "用户名称")
+    private String userName;
+    @Schema(description = "角色")
+    private String role;
+    @Schema(description = "头像地址")
+    private String avatarUrl;
 
     public LoginVO() {
     }
@@ -36,5 +44,37 @@ public class LoginVO implements Serializable {
 
     public void setExpireInSeconds(long expireInSeconds) {
         this.expireInSeconds = expireInSeconds;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

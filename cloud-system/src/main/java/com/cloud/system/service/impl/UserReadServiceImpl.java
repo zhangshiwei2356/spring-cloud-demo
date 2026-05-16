@@ -22,9 +22,9 @@ public class UserReadServiceImpl extends BaseService<UserQueryDTO, UserVO> imple
     private static final Map<Long, UserVO> DEMO_USERS = new HashMap<>();
 
     static {
-        DEMO_USERS.put(1L, new UserVO(1L, "演示用户一号"));
-        DEMO_USERS.put(2L, new UserVO(2L, "演示用户二号"));
-        DEMO_USERS.put(10086L, new UserVO(10086L, "演示用户10086"));
+        DEMO_USERS.put(1L, new UserVO(1L, "演示用户一号", "超级管理员", "/img/avatar-1.svg"));
+        DEMO_USERS.put(2L, new UserVO(2L, "演示用户二号", "运营专员", "/img/avatar-2.svg"));
+        DEMO_USERS.put(10086L, new UserVO(10086L, "演示用户10086", "普通用户", "/img/avatar-3.svg"));
     }
 
     @Override
@@ -36,7 +36,7 @@ public class UserReadServiceImpl extends BaseService<UserQueryDTO, UserVO> imple
         if (u == null) {
             throw new GlobalException("用户不存在");
         }
-        return new UserVO(u.getUserId(), u.getUserName());
+        return new UserVO(u.getUserId(), u.getUserName(), u.getRole(), u.getAvatarUrl());
     }
 
     @Override

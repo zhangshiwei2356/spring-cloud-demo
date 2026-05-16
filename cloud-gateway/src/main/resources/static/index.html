@@ -206,10 +206,15 @@
     </section>
 </div>
 
+<script src="/js/app.js"></script>
 <script>
 (function () {
+    if (!sessionStorage.getItem('demo_token')) {
+        window.location.replace('/login.html');
+        return;
+    }
     const API = '';
-    let token = sessionStorage.getItem('demo_token') || '';
+    let token = AppSession.getToken();
 
     const $ = (id) => document.getElementById(id);
     const tokenBox = $('tokenBox');
@@ -270,7 +275,13 @@
             show(res, res.code !== 200);
             if (res.code === 200 && res.data && res.data.accessToken) {
                 token = res.data.accessToken;
-                sessionStorage.setItem('demo_token', token);
+                AppSession.save(token, {
+                    userId: res.data.userId,
+                    userName: res.data.userName,
+                    role: res.data.role,
+                    avatarUrl: res.data.avatarUrl,
+                    expireInSeconds: res.data.expireInSeconds
+                });
                 $('buyerId').value = String(userId);
                 $('queryUserId').value = String(userId);
                 syncTokenUi();
