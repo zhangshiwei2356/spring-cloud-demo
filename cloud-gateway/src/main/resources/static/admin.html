@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>管理后台 · Spring Cloud Demo</title>
+    <link rel="stylesheet" href="/css/app.css"/>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo">SC</div>
+            <span>Cloud 管理台</span>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-group">主菜单</div>
+            <button type="button" class="nav-item active" data-page="dashboard"><span class="icon">⌂</span>工作台</button>
+
+            <div class="nav-group">管理中心</div>
+            <button type="button" class="nav-item" data-page="company"><span class="icon">🏢</span>公司管理</button>
+            <button type="button" class="nav-item" data-page="department"><span class="icon">🏬</span>部门管理</button>
+            <button type="button" class="nav-item" data-page="userMgmt"><span class="icon">👥</span>用户管理</button>
+            <button type="button" class="nav-item" data-page="productMgmt"><span class="icon">📦</span>产品管理</button>
+            <button type="button" class="nav-item" data-page="orderMgmt"><span class="icon">📋</span>订单管理</button>
+            <button type="button" class="nav-item" data-page="archive"><span class="icon">🗂️</span>档案管理</button>
+
+            <div class="nav-group">微服务联调</div>
+            <button type="button" class="nav-item" data-page="api-user"><span class="icon">🔗</span>用户查询 API</button>
+            <button type="button" class="nav-item" data-page="api-product"><span class="icon">🔗</span>商品询价 API</button>
+            <button type="button" class="nav-item" data-page="api-order"><span class="icon">🔗</span>提交订单 API</button>
+
+            <div class="nav-group">系统</div>
+            <button type="button" class="nav-item" data-page="health"><span class="icon">♥</span>网关健康</button>
+            <button type="button" class="nav-item" data-page="docs"><span class="icon">📄</span>接口文档</button>
+            <a class="nav-item" href="/index.html" style="text-decoration:none"><span class="icon">⚡</span>API 联调页</a>
+        </nav>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div class="topbar-title" id="pageTitle">工作台</div>
+            <div class="user-bar">
+                <div class="user-meta">
+                    <div class="name" id="headerUserName">-</div>
+                    <span class="role" id="headerRole">-</span>
+                </div>
+                <img id="headerAvatar" class="avatar" src="/img/avatar-1.svg" alt="avatar"/>
+                <button type="button" class="btn btn-ghost btn-sm" id="btnLogout">退出</button>
+            </div>
+        </header>
+
+        <div class="content">
+            <section id="page-dashboard" class="page active">
+                <div class="welcome-banner">
+                    <img id="welcomeAvatar" class="avatar-lg" src="/img/avatar-1.svg" alt=""/>
+                    <div>
+                        <h2 id="welcomeText">欢迎回来</h2>
+                        <p id="welcomeSub">已通过 JWT 登录，可在管理中心进行模拟增删改查。</p>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat-card"><div class="label">用户 ID</div><div class="value" id="statUserId">-</div></div>
+                    <div class="stat-card"><div class="label">角色</div><div class="value" id="statRole">-</div></div>
+                    <div class="stat-card"><div class="label">Token 有效期</div><div class="value" id="statExpire">-</div></div>
+                    <div class="stat-card"><div class="label">网关端口</div><div class="value">9000</div></div>
+                </div>
+                <div class="card">
+                    <h3>快捷入口</h3>
+                    <button type="button" class="btn" data-goto="orderMgmt">订单管理</button>
+                    <button type="button" class="btn btn-ghost" data-goto="productMgmt" style="margin-left:0.5rem">产品管理</button>
+                    <button type="button" class="btn btn-ghost" data-goto="api-order" style="margin-left:0.5rem">提交真实订单</button>
+                </div>
+            </section>
+
+            <section id="page-company" class="page"><div id="crud-company"></div></section>
+            <section id="page-department" class="page"><div id="crud-department"></div></section>
+            <section id="page-userMgmt" class="page"><div id="crud-userMgmt"></div></section>
+            <section id="page-productMgmt" class="page"><div id="crud-productMgmt"></div></section>
+            <section id="page-orderMgmt" class="page"><div id="crud-orderMgmt"></div></section>
+            <section id="page-archive" class="page"><div id="crud-archive"></div></section>
+
+            <section id="page-api-user" class="page page-api">
+                <div class="card">
+                    <h2>查询用户（cloud-system）</h2>
+                    <div class="row">
+                        <div style="flex:1"><label for="queryUserId">用户 ID</label><input id="queryUserId" type="number"/></div>
+                        <button type="button" class="btn" id="btnUser">查询</button>
+                    </div>
+                    <p class="hint">GET /cloud-system/api/system/users/{id}</p>
+                </div>
+            </section>
+
+            <section id="page-api-product" class="page page-api">
+                <div class="card">
+                    <h2>商品询价（cloud-system）</h2>
+                    <div class="row">
+                        <div style="flex:1"><label for="sku">商品编码</label><input id="sku" type="text" value="SKU-DEMO"/></div>
+                        <button type="button" class="btn" id="btnPrice">询价</button>
+                    </div>
+                    <p class="hint">GET /cloud-system/api/system/products/price?code=...</p>
+                </div>
+            </section>
+
+            <section id="page-api-order" class="page page-api">
+                <div class="card">
+                    <h2>提交订单（cloud-business）</h2>
+                    <div class="grid-2">
+                        <div><label for="buyerId">买家 userId</label><input id="buyerId" type="number"/></div>
+                        <div><label for="qty">数量</label><input id="qty" type="number" value="2" min="1"/></div>
+                    </div>
+                    <button type="button" class="btn" id="btnOrder" style="margin-top:0.75rem">提交订单</button>
+                    <p class="hint">POST /cloud-business/api/orders/submit</p>
+                </div>
+            </section>
+
+            <section id="page-health" class="page">
+                <div class="card">
+                    <h2>网关健康检查</h2>
+                    <button type="button" class="btn" id="btnHealth">检测 /actuator/health</button>
+                    <p id="healthStatus" class="hint"></p>
+                </div>
+            </section>
+
+            <section id="page-docs" class="page">
+                <div class="card doc-links">
+                    <h2>Swagger / Knife4j 文档</h2>
+                    <p><a href="/cloud-auth/doc.html" target="_blank">cloud-auth 文档</a></p>
+                    <p><a href="/cloud-system/doc.html" target="_blank">cloud-system 文档</a></p>
+                    <p><a href="/cloud-business/doc.html" target="_blank">cloud-business 文档</a></p>
+                </div>
+            </section>
+
+            <section class="card page-api-output">
+                <h2>接口响应（微服务联调）</h2>
+                <pre id="output" class="output">{}</pre>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="/js/app.js"></script>
+<script src="/js/mock-crud.js"></script>
+<script src="/js/archive-admin.js"></script>
+<script>
+(function () {
+    if (!AppSession.requireAuth()) return;
+
+    const user = AppSession.getUser();
+    const $ = (id) => document.getElementById(id);
+    const output = $('output');
+
+    const CRUD_PAGES = ['company', 'department', 'userMgmt', 'productMgmt', 'orderMgmt'];
+
+    const titles = {
+        dashboard: '工作台',
+        company: '公司管理',
+        department: '部门管理',
+        userMgmt: '用户管理',
+        productMgmt: '产品管理',
+        orderMgmt: '订单管理',
+        archive: '档案管理',
+        'api-user': '用户查询 API',
+        'api-product': '商品询价 API',
+        'api-order': '提交订单 API',
+        health: '网关健康',
+        docs: '接口文档'
+    };
+
+    function avatarSrc(url) {
+        return url || '/img/avatar-1.svg';
+    }
+
+    function initProfile() {
+        $('headerUserName').textContent = user.userName || '-';
+        $('headerRole').textContent = user.role || '-';
+        $('headerAvatar').src = avatarSrc(user.avatarUrl);
+        $('welcomeAvatar').src = avatarSrc(user.avatarUrl);
+        $('welcomeText').textContent = '欢迎，' + (user.userName || '');
+        $('welcomeSub').textContent = '当前角色：' + (user.role || '-') + ' · 用户 ID：' + user.userId;
+        $('statUserId').textContent = user.userId;
+        $('statRole').textContent = user.role || '-';
+        $('statExpire').textContent = (user.expireInSeconds || 0) + ' 秒';
+        $('queryUserId').value = user.userId;
+        $('buyerId').value = user.userId;
+    }
+
+    function switchPage(name) {
+        document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
+        document.querySelectorAll('.nav-item[data-page]').forEach(function (n) { n.classList.remove('active'); });
+        const page = $('page-' + name);
+        if (page) page.classList.add('active');
+        const nav = document.querySelector('.nav-item[data-page="' + name + '"]');
+        if (nav) nav.classList.add('active');
+        $('pageTitle').textContent = titles[name] || name;
+
+        if (CRUD_PAGES.indexOf(name) >= 0) {
+            const root = $('crud-' + name);
+            if (root) MockCrudRegistry.mount(name, root);
+        }
+        if (name === 'archive') {
+            const root = $('crud-archive');
+            if (root && typeof ArchiveAdmin !== 'undefined') {
+                ArchiveAdmin.mount(root);
+            }
+        }
+
+        const apiOut = document.querySelector('.page-api-output');
+        if (apiOut) {
+            apiOut.style.display = name.indexOf('api-') === 0 ? 'block' : 'none';
+        }
+    }
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(function (btn) {
+        btn.addEventListener('click', function () { switchPage(btn.getAttribute('data-page')); });
+    });
+    document.querySelectorAll('[data-goto]').forEach(function (btn) {
+        btn.addEventListener('click', function () { switchPage(btn.getAttribute('data-goto')); });
+    });
+
+    $('btnLogout').onclick = logout;
+
+    $('btnUser').onclick = async function () {
+        try {
+            const res = await apiRequest('GET', '/cloud-system/api/system/users/' + $('queryUserId').value, null, true);
+            renderJson(output, res, res.code !== 200);
+        } catch (e) { renderJson(output, e.message, true); }
+    };
+
+    $('btnPrice').onclick = async function () {
+        try {
+            const code = encodeURIComponent($('sku').value.trim());
+            const res = await apiRequest('GET', '/cloud-system/api/system/products/price?code=' + code, null, true);
+            renderJson(output, res, res.code !== 200);
+        } catch (e) { renderJson(output, e.message, true); }
+    };
+
+    $('btnOrder').onclick = async function () {
+        try {
+            const body = {
+                buyerUserId: Number($('buyerId').value),
+                productCode: $('sku').value.trim(),
+                quantity: Number($('qty').value)
+            };
+            const res = await apiRequest('POST', '/cloud-business/api/orders/submit', body, true);
+            renderJson(output, res, res.code !== 200);
+            if (res.code === 200 && res.data) {
+                MockCrudRegistry.refresh('orderMgmt');
+            }
+        } catch (e) { renderJson(output, e.message, true); }
+    };
+
+    $('btnHealth').onclick = async function () {
+        const el = $('healthStatus');
+        el.textContent = '检测中…';
+        try {
+            const res = await fetch('/actuator/health');
+            const json = await res.json();
+            el.textContent = '状态: ' + (json.status || 'UNKNOWN');
+            renderJson(output, json, json.status !== 'UP');
+        } catch (e) {
+            el.textContent = '网关不可达';
+            renderJson(output, e.message, true);
+        }
+    };
+
+    initProfile();
+    document.querySelector('.page-api-output').style.display = 'none';
+})();
+</script>
+</body>
+</html>
