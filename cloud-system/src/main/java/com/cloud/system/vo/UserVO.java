@@ -11,6 +11,8 @@ public class UserVO implements Serializable {
 
     private Long userId;
     private String userName;
+    private String role;
+    private String avatarUrl;
 
     public UserVO() {
     }
@@ -18,6 +20,13 @@ public class UserVO implements Serializable {
     public UserVO(Long userId, String userName) {
         this.userId = userId;
         this.userName = userName;
+    }
+
+    public UserVO(Long userId, String userName, String role, String avatarUrl) {
+        this.userId = userId;
+        this.userName = userName;
+        this.role = role;
+        this.avatarUrl = avatarUrl;
     }
 
     public Long getUserId() {
@@ -34,5 +43,21 @@ public class UserVO implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

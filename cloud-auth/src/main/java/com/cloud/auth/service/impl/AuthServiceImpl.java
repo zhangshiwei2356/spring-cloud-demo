@@ -1,5 +1,6 @@
 package com.cloud.auth.service.impl;
 
+import com.cloud.auth.demo.DemoUserProfile;
 import com.cloud.auth.dto.LoginRequest;
 import com.cloud.auth.service.AuthService;
 import com.cloud.auth.vo.LoginVO;
@@ -39,10 +40,20 @@ public class AuthServiceImpl extends BaseService<LoginRequest, LoginVO> implemen
         if (!DEMO_PASSWORD.equals(request.getPassword())) {
             throw new GlobalException("用户名或密码错误");
         }
+        DemoUserProfile profile = DemoUserProfile.of(request.getUserId());
+        if (profile == null) {
+            throw new GlobalException("演示环境仅支持用户 1、2、10086");
+        }
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", request.getUserId());
+        claims.put("role", profile.getRole());
         String token = jwtUtil.createAccessToken(String.valueOf(request.getUserId()), claims);
-        return new LoginVO(token, jwtProperties.getAccessTokenTtlSeconds());
+        LoginVO vo = new LoginVO(token, jwtProperties.getAccessTokenTtlSeconds());
+        vo.setUserId(profile.getUserId());
+        vo.setUserName(profile.getUserName());
+        vo.setRole(profile.getRole());
+        vo.setAvatarUrl(profile.getAvatarUrl());
+        return vo;
     }
 
     @Override

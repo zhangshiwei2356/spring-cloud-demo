@@ -19,6 +19,6 @@ public class DemoWebConfig {
     @Bean
     public RouterFunction<ServerResponse> demoIndexRedirect() {
         return RouterFunctions.route(GET("/"), request ->
-                ServerResponse.temporaryRedirect(URI.create("/index.html")).build());
+                ServerResponse.temporaryRedirect(URI.create("/login.html")).build());
     }
 }

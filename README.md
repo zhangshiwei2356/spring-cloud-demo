@@ -41,9 +41,13 @@
 
 启动 **cloud-gateway**（及 auth / system / business）后，浏览器访问：
 
-**http://localhost:9000/** 或 **http://localhost:9000/index.html**
+| 地址 | 说明 |
+|------|------|
+| http://localhost:9000/ | **登录页**，成功后跳转管理后台 |
+| http://localhost:9000/admin.html | 管理后台（需已登录） |
+| http://localhost:9000/index.html | API 联调页（需已登录） |
 
-页面内可完成：登录拿 Token → 查询用户 / 商品询价 → 提交订单，并查看 JSON 响应；无需单独部署前端工程。
+演示账号：**userId=1/2/10086**，密码 **123456**。登录后展示用户名、角色、头像；左侧菜单可查询用户、询价、下单等。
 
 ## 演示调用（API）
 
