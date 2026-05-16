@@ -12,6 +12,9 @@ import java.util.List;
 public class GatewaySecurityProperties {
 
     private List<String> permitAll = new ArrayList<>(List.of(
+            "/",
+            "/index.html",
+            "/favicon.ico",
             "/cloud-auth/api/auth/login",
             "/cloud-auth/v3/api-docs/**",
             "/cloud-auth/swagger-ui/**",

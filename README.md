@@ -37,7 +37,15 @@
 
 3. **profile `local`**：与默认单机行为一致，并**强制**关闭 Nacos（即使误设 `NACOS_ENABLED=true` 也不会去连注册中心）。旧习惯可继续写 `spring.profiles.active=local`。
 
-## 演示调用
+## 页面演示（前后端一体）
+
+启动 **cloud-gateway**（及 auth / system / business）后，浏览器访问：
+
+**http://localhost:9000/** 或 **http://localhost:9000/index.html**
+
+页面内可完成：登录拿 Token → 查询用户 / 商品询价 → 提交订单，并查看 JSON 响应；无需单独部署前端工程。
+
+## 演示调用（API）
 
 ### 登录拿 Token（经网关）
 
