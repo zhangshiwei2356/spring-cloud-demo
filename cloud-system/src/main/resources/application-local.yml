@@ -1,0 +1,6 @@
+# profile=local：显式关闭 Nacos
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false

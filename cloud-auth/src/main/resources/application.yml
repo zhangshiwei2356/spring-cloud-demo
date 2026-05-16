@@ -1,0 +1,35 @@
+# 单机演示默认不连 Nacos，直接运行本模块即可（文档 /doc.html）。
+# 注册中心模式：--spring.profiles.active=nacos 且启动 Nacos（见 application-nacos.yml）。
+server:
+  port: 9101
+
+spring:
+  application:
+    name: cloud-auth
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        enabled: ${NACOS_ENABLED:false}
+
+cloud:
+  security:
+    jwt:
+      secret: cloud-demo-jwt-signing-secret-min-32-bytes-required-for-hs256-xx
+      issuer: cloud-auth
+      access-token-ttl-seconds: 7200
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true

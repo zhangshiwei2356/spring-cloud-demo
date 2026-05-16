@@ -1,0 +1,13 @@
+# 启用注册中心并让 Feign 通过服务名负载均衡调用 cloud-system（不再写死 URL）
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+    openfeign:
+      client:
+        config:
+          systemUserFeignClient:
+            url: ~
+          systemProductFeignClient:
+            url: ~

@@ -1,0 +1,55 @@
+# 单机：默认不调 Nacos，Feign 直连 cloud-system:9102（可调 FEIGN_CLOUD_SYSTEM_URL）。
+# 完整链路请先起 cloud-system（9102）再跑本模块；可走网关 9000 联调。
+server:
+  port: 9103
+
+spring:
+  application:
+    name: cloud-business
+  # --- MySQL 占位（默认不启用）：接入时增加数据源 + mybatis/mysql 依赖，并切换到 Mapper 实现持久化 ---
+  # datasource:
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/cloud_demo
+  #   username: ${MYSQL_USER:root}
+  #   password: ${MYSQL_PASSWORD:root}
+  # --- Redis 占位（默认不启用）：接入时增加 spring-boot-starter-data-redis / Redisson ---
+  # data:
+  #   redis:
+  #     host: ${REDIS_HOST:127.0.0.1}
+  #     port: ${REDIS_PORT:6379}
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        enabled: ${NACOS_ENABLED:false}
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 8000
+          # Feign 带 contextId 时按 contextId 匹配配置，不能只用服务名 cloud-system
+          systemUserFeignClient:
+            url: ${FEIGN_CLOUD_SYSTEM_URL:http://127.0.0.1:9102}
+          systemProductFeignClient:
+            url: ${FEIGN_CLOUD_SYSTEM_URL:http://127.0.0.1:9102}
+
+cloud:
+  security:
+    jwt:
+      secret: cloud-demo-jwt-signing-secret-min-32-bytes-required-for-hs256-xx
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

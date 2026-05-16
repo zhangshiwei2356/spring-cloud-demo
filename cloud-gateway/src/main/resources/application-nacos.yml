@@ -1,0 +1,12 @@
+# 网关与各服务同上：先启动 Nacos，再对本模块与各下游使用 profile nacos
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+
+gateway:
+  routes:
+    auth: lb://cloud-auth
+    system: lb://cloud-system
+    business: lb://cloud-business

@@ -1,0 +1,7 @@
+# 与默认单机配置等价：仅当您显式使用 spring.profiles.active=local 时强制关 Nacos，
+# 避免误开 NACOS_ENABLED=true 时仍走注册中心。
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false

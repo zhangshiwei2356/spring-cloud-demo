@@ -1,0 +1,33 @@
+# 单机演示默认不连 Nacos；与 cloud-auth、business、gateway 同机时无需额外配置。
+# 注册中心：--spring.profiles.active=nacos
+server:
+  port: 9102
+
+spring:
+  application:
+    name: cloud-system
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        enabled: ${NACOS_ENABLED:false}
+
+cloud:
+  security:
+    jwt:
+      secret: cloud-demo-jwt-signing-secret-min-32-bytes-required-for-hs256-xx
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

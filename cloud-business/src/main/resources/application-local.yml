@@ -1,0 +1,6 @@
+# 与默认等价：profile=local 时强制关闭注册中心。
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false

@@ -1,0 +1,6 @@
+# profile=local：显式关闭 Nacos（默认 application.yml 已为关闭，此处防误开 NACOS_ENABLED）
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false

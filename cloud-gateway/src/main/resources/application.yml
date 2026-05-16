@@ -1,0 +1,63 @@
+# 单机：默认直连各服务固定端口；先启动 auth 9101 / system 9102 / business 9103 再启网关。
+# 注册中心：--spring.profiles.active=nacos
+server:
+  port: 9000
+
+# 直连下游（可被环境变量或 nacos profile 覆盖为 lb://...）
+gateway:
+  routes:
+    auth: ${GATEWAY_ROUTE_AUTH:http://127.0.0.1:9101}
+    system: ${GATEWAY_ROUTE_SYSTEM:http://127.0.0.1:9102}
+    business: ${GATEWAY_ROUTE_BUSINESS:http://127.0.0.1:9103}
+
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        enabled: ${NACOS_ENABLED:false}
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          "[/**]":
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: false
+      routes:
+        - id: cloud-auth
+          uri: ${gateway.routes.auth}
+          predicates:
+            - Path=/cloud-auth/**
+          filters:
+            - StripPrefix=1
+        - id: cloud-system
+          uri: ${gateway.routes.system}
+          predicates:
+            - Path=/cloud-system/**
+          filters:
+            - StripPrefix=1
+        - id: cloud-business
+          uri: ${gateway.routes.business}
+          predicates:
+            - Path=/cloud-business/**
+          filters:
+            - StripPrefix=1
+
+cloud:
+  security:
+    jwt:
+      secret: cloud-demo-jwt-signing-secret-min-32-bytes-required-for-hs256-xx
+      issuer: cloud-auth
+      access-token-ttl-seconds: 7200
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
