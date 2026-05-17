@@ -4,15 +4,10 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Spring Cloud Demo · 联调演示</title>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/themes.css"/>
     <style>
         :root {
-            --bg: #0f1419;
-            --panel: #1a2332;
-            --border: #2d3a4f;
-            --text: #e7ecf3;
-            --muted: #8b9cb3;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
             --ok: #22c55e;
             --err: #ef4444;
         }
@@ -34,7 +29,7 @@
             font-size: 0.75rem;
             padding: 0.15rem 0.5rem;
             border-radius: 4px;
-            background: #243044;
+            background: var(--bg-elevated);
             color: var(--muted);
             margin-top: 0.5rem;
         }
@@ -126,6 +121,7 @@
 </head>
 <body>
 <div class="wrap">
+    <div id="themeMount" class="theme-mount--index"></div>
     <header>
         <h1>Spring Cloud 微服务演示</h1>
         <p>前后端一体 · 经网关 <code style="color:#93c5fd">:9000</code> 调用 auth / system / business</p>
@@ -209,6 +205,9 @@
 <script src="/js/app.js"></script>
 <script>
 (function () {
+    AppTheme.init();
+    AppTheme.mountPicker(document.getElementById('themeMount'));
+
     if (!sessionStorage.getItem('demo_token')) {
         window.location.replace('/login.html');
         return;

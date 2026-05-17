@@ -1,8 +1,13 @@
-package com.cloud.business.demo.entity;
+package com.cloud.business.entity;
 
-import com.cloud.business.demo.Identifiable;
+import com.cloud.business.common.Identifiable;
 
-public class CompanyRecord implements Identifiable {
+import java.io.Serializable;
+
+/** 映射表占位：{@code biz_company} */
+public class CompanyEntity implements Identifiable, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private String code;
@@ -11,6 +16,9 @@ public class CompanyRecord implements Identifiable {
     private String phone;
     private String status;
     private String createTime;
+
+    public CompanyEntity() {
+    }
 
     @Override
     public Long getId() {

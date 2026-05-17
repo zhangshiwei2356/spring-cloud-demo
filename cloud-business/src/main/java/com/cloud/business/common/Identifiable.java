@@ -1,4 +1,4 @@
-package com.cloud.business.demo;
+package com.cloud.business.common;
 
 public interface Identifiable {
 

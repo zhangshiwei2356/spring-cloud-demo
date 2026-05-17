@@ -1,25 +1,25 @@
-package com.cloud.business.demo.entity;
+package com.cloud.business.dto;
 
-import com.cloud.business.demo.Identifiable;
+import jakarta.validation.constraints.NotBlank;
 
-public class DemoUserRecord implements Identifiable {
+import java.io.Serializable;
 
-    private Long id;
+public class AdminUserSaveDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @NotBlank(message = "登录名不能为空")
     private String loginName;
+
+    @NotBlank(message = "姓名不能为空")
     private String userName;
+
     private String deptName;
     private String role;
     private String phone;
     private String status;
 
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(Long id) {
-        this.id = id;
+    public AdminUserSaveDTO() {
     }
 
     public String getLoginName() {

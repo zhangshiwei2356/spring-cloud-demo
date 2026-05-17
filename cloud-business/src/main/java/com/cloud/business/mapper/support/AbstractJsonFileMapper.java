@@ -1,5 +1,7 @@
-package com.cloud.business.demo;
+package com.cloud.business.mapper.support;
 
+import com.cloud.business.common.Identifiable;
+import com.cloud.business.persistence.json.JsonFileRepository;
 import com.cloud.common.exception.GlobalException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,30 +11,30 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class DemoCrudService<T extends Identifiable> {
+/**
+ * JSON 文件 Mapper 基类；接入 MySQL 时可替换为 MyBatis-Plus Mapper 实现。
+ */
+public abstract class AbstractJsonFileMapper<T extends Identifiable> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final JsonFileRepository<T> repository;
     private final TypeReference<List<T>> typeRef;
     private final String seedClasspath;
-    private final Consumer<T> onCreate;
+    private final Consumer<T> onInsert;
 
-    public DemoCrudService(Path dataFile,
-                           TypeReference<List<T>> typeRef,
-                           String seedClasspath,
-                           Consumer<T> onCreate) throws IOException {
+    protected AbstractJsonFileMapper(Path dataFile,
+                                     TypeReference<List<T>> typeRef,
+                                     String seedClasspath,
+                                     Consumer<T> onInsert) throws IOException {
         this.typeRef = typeRef;
         this.repository = new JsonFileRepository<>(dataFile, typeRef);
         this.seedClasspath = seedClasspath;
-        this.onCreate = onCreate != null ? onCreate : (r) -> { };
+        this.onInsert = onInsert != null ? onInsert : (r) -> { };
         initSeed();
     }
 
@@ -46,31 +48,35 @@ public class DemoCrudService<T extends Identifiable> {
         }
     }
 
-    public List<T> list() {
+    public String dataFilePath() {
+        return repository.dataFilePath().toString();
+    }
+
+    public List<T> selectAll() {
         return run(repository::findAll).stream()
                 .sorted(Comparator.comparing(Identifiable::getId).reversed())
                 .toList();
     }
 
-    public T get(Long id) {
+    public T selectById(Long id) {
         return run(() -> repository.findById(id)
                 .orElseThrow(() -> new GlobalException("记录不存在")));
     }
 
-    public T create(T record) {
+    public T insert(T entity) {
         return run(() -> {
-            onCreate.accept(record);
-            return repository.insert(record);
+            onInsert.accept(entity);
+            return repository.insert(entity);
         });
     }
 
-    public T update(Long id, T record) {
+    public T updateById(Long id, T entity) {
         return run(() -> {
             if (repository.findById(id).isEmpty()) {
                 throw new GlobalException("记录不存在");
             }
-            record.setId(id);
-            T updated = repository.update(record);
+            entity.setId(id);
+            T updated = repository.update(entity);
             if (updated == null) {
                 throw new GlobalException("更新失败");
             }
@@ -78,7 +84,7 @@ public class DemoCrudService<T extends Identifiable> {
         });
     }
 
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         run(() -> {
             if (!repository.deleteById(id)) {
                 throw new GlobalException("记录不存在");
@@ -87,7 +93,7 @@ public class DemoCrudService<T extends Identifiable> {
         });
     }
 
-    public List<T> reset() {
+    public List<T> resetFromSeed() {
         return run(() -> {
             ClassPathResource resource = new ClassPathResource(seedClasspath);
             if (!resource.exists()) {
@@ -108,22 +114,18 @@ public class DemoCrudService<T extends Identifiable> {
         });
     }
 
+    protected static boolean isBlank(String s) {
+        return !StringUtils.hasText(s);
+    }
+
     private <R> R run(IoSupplier<R> supplier) {
         try {
             return supplier.get();
         } catch (GlobalException ex) {
             throw ex;
         } catch (IOException ex) {
-            throw new GlobalException("读写演示数据失败：" + ex.getMessage());
+            throw new GlobalException("读写业务数据失败：" + ex.getMessage());
         }
-    }
-
-    protected static String now() {
-        return LocalDateTime.now().format(DT);
-    }
-
-    public static boolean isBlank(String s) {
-        return !StringUtils.hasText(s);
     }
 
     @FunctionalInterface

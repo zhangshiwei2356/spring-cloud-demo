@@ -2,7 +2,7 @@
  * 管理中心 CRUD：数据持久化在 cloud-business 模块 data/demo/*.json。
  */
 const MockCrudRegistry = (function () {
-    const API_DEMO_BASE = '/cloud-business/api/demo';
+    const API_STORAGE_PATH = '/cloud-business/api/business/storage-path';
 
     const STATUS_OPTIONS = [
         { value: '1', label: '启用' },
@@ -22,11 +22,38 @@ const MockCrudRegistry = (function () {
         return o ? o.label : value;
     }
 
+    function statusBadge(value, kind) {
+        const label = kind === 'order' ? labelOf(ORDER_STATUS, value) : labelOf(STATUS_OPTIONS, value);
+        let cls = 'badge-muted';
+        if (kind === 'order') {
+            if (value === 'PAID' || value === 'DONE') cls = 'badge-ok';
+            else if (value === 'PENDING') cls = 'badge-warn';
+            else if (value === 'SHIPPED') cls = 'badge-info';
+            else if (value === 'CANCEL') cls = 'badge-danger';
+        } else if (value === '1') cls = 'badge-ok';
+        return '<span class="badge-pill ' + cls + '">' + escapeHtml(String(label)) + '</span>';
+    }
+
+    let toastHost = null;
+    function toast(msg, ok) {
+        if (!toastHost) {
+            toastHost = document.createElement('div');
+            toastHost.className = 'toast-host';
+            document.body.appendChild(toastHost);
+        }
+        const el = document.createElement('div');
+        el.className = 'toast toast-' + (ok ? 'ok' : 'err');
+        el.innerHTML = '<span class="toast-icon">' + (ok ? '✓' : '✕') + '</span><span>' + escapeHtml(msg) + '</span>';
+        toastHost.appendChild(el);
+        setTimeout(function () { el.remove(); }, 2600);
+    }
+
     const CONFIGS = {
         company: {
             title: '公司管理',
             hint: '数据保存在 cloud-business 目录 data/demo/companies.json',
-            apiResource: 'companies',
+            apiBase: '/cloud-business/api/companies',
+            dataFile: 'companies.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -34,7 +61,7 @@ const MockCrudRegistry = (function () {
                 { key: 'name', label: '公司名称' },
                 { key: 'contact', label: '联系人' },
                 { key: 'phone', label: '电话' },
-                { key: 'status', label: '状态', render: (r) => labelOf(STATUS_OPTIONS, r.status) },
+                { key: 'status', label: '状态', renderHtml: (r) => statusBadge(r.status, 'status') },
                 { key: 'createTime', label: '创建时间' }
             ],
             fields: [
@@ -48,7 +75,8 @@ const MockCrudRegistry = (function () {
         department: {
             title: '部门管理',
             hint: '数据保存在 data/demo/departments.json',
-            apiResource: 'departments',
+            apiBase: '/cloud-business/api/departments',
+            dataFile: 'departments.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -56,7 +84,7 @@ const MockCrudRegistry = (function () {
                 { key: 'name', label: '部门名称' },
                 { key: 'leader', label: '负责人' },
                 { key: 'phone', label: '电话' },
-                { key: 'status', label: '状态', render: (r) => labelOf(STATUS_OPTIONS, r.status) }
+                { key: 'status', label: '状态', renderHtml: (r) => statusBadge(r.status, 'status') }
             ],
             fields: [
                 { key: 'companyName', label: '所属公司', required: true },
@@ -69,7 +97,8 @@ const MockCrudRegistry = (function () {
         userMgmt: {
             title: '用户管理',
             hint: '数据保存在 data/demo/users.json',
-            apiResource: 'users',
+            apiBase: '/cloud-business/api/admin/users',
+            dataFile: 'users.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -78,7 +107,7 @@ const MockCrudRegistry = (function () {
                 { key: 'deptName', label: '部门' },
                 { key: 'role', label: '角色' },
                 { key: 'phone', label: '手机' },
-                { key: 'status', label: '状态', render: (r) => labelOf(STATUS_OPTIONS, r.status) }
+                { key: 'status', label: '状态', renderHtml: (r) => statusBadge(r.status, 'status') }
             ],
             fields: [
                 { key: 'loginName', label: '登录名', required: true },
@@ -96,7 +125,8 @@ const MockCrudRegistry = (function () {
         productMgmt: {
             title: '产品管理',
             hint: '数据保存在 data/demo/products.json',
-            apiResource: 'products',
+            apiBase: '/cloud-business/api/products',
+            dataFile: 'products.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -105,7 +135,7 @@ const MockCrudRegistry = (function () {
                 { key: 'category', label: '分类' },
                 { key: 'price', label: '单价(元)' },
                 { key: 'stock', label: '库存' },
-                { key: 'status', label: '状态', render: (r) => labelOf(STATUS_OPTIONS, r.status) }
+                { key: 'status', label: '状态', renderHtml: (r) => statusBadge(r.status, 'status') }
             ],
             fields: [
                 { key: 'code', label: 'SKU 编码', required: true },
@@ -119,7 +149,8 @@ const MockCrudRegistry = (function () {
         orderMgmt: {
             title: '订单管理',
             hint: '数据保存在 data/demo/orders.json（与真实下单 API 独立）',
-            apiResource: 'orders',
+            apiBase: '/cloud-business/api/admin/orders',
+            dataFile: 'orders.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -128,7 +159,7 @@ const MockCrudRegistry = (function () {
                 { key: 'productName', label: '商品' },
                 { key: 'quantity', label: '数量' },
                 { key: 'amount', label: '金额(元)' },
-                { key: 'status', label: '状态', render: (r) => labelOf(ORDER_STATUS, r.status) },
+                { key: 'status', label: '状态', renderHtml: (r) => statusBadge(r.status, 'order') },
                 { key: 'createTime', label: '下单时间' }
             ],
             fields: [
@@ -147,14 +178,14 @@ const MockCrudRegistry = (function () {
     class ApiStore {
         constructor(config) {
             this.config = config;
-            this.apiBase = API_DEMO_BASE + '/' + config.apiResource;
+            this.apiBase = config.apiBase;
             this.rows = [];
             this.storagePath = '';
         }
 
         async fetchStoragePath() {
             try {
-                const res = await apiRequest('GET', API_DEMO_BASE + '/storage-path', null, true);
+                const res = await apiRequest('GET', API_STORAGE_PATH, null, true);
                 if (res.code === 200 && res.data) {
                     this.storagePath = res.data;
                 }
@@ -227,7 +258,10 @@ const MockCrudRegistry = (function () {
 
         async render(root) {
             this.root = root;
-            root.innerHTML = '<p class="hint">加载中…</p>';
+            root.innerHTML = '<div class="crud-panel"><div class="crud-skeleton"></div><div class="crud-loading"><div class="crud-loading-spinner"></div>加载中…</div></div>';
+            root.innerHTML = '<div class="crud-panel"><div class="crud-skeleton"></div><div class="crud-loading"><div class="crud-loading-spinner"></div>加载中…</div></div>';
+            root.innerHTML = '<div class="crud-panel"><div class="crud-skeleton"></div><div class="crud-loading"><div class="crud-loading-spinner"></div>加载中…</div></div>';
+            root.innerHTML = '<div class="crud-panel"><div class="crud-skeleton"></div><div class="crud-loading"><div class="crud-loading-spinner"></div>加载中…</div></div>';
             try {
                 await this.store.fetchStoragePath();
                 await this.store.load();
@@ -236,9 +270,12 @@ const MockCrudRegistry = (function () {
                 return;
             }
             root.innerHTML = '';
-            root.appendChild(this.buildToolbar());
-            root.appendChild(this.buildTableWrap());
-            root.appendChild(this.buildModal());
+            const panel = document.createElement('div');
+            panel.className = 'crud-panel';
+            panel.appendChild(this.buildToolbar());
+            panel.appendChild(this.buildTableWrap());
+            panel.appendChild(this.buildModal());
+            root.appendChild(panel);
             this.refreshTable();
         }
 
@@ -246,16 +283,20 @@ const MockCrudRegistry = (function () {
             const bar = document.createElement('div');
             bar.className = 'crud-toolbar';
             const pathHint = this.store.storagePath
-                ? '存储路径：' + this.store.storagePath + '/' + this.config.apiResource + '.json'
+                ? '存储路径：' + this.store.storagePath + '/' + this.config.dataFile
                 : this.config.hint;
             bar.innerHTML =
                 '<div class="crud-toolbar-left">' +
                 '<h2>' + this.config.title + '</h2>' +
                 '<p class="hint">' + escapeHtml(pathHint) + '</p>' +
+                '<span class="crud-count" data-total></span>' +
                 '</div>' +
                 '<div class="crud-toolbar-right">' +
-                '<input type="search" class="crud-search" placeholder="关键字搜索…" />' +
-                '<button type="button" class="btn btn-sm" data-act="add">新增</button>' +
+                '<div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span>' +
+                '<input type="search" class="crud-search" placeholder="搜索关键字…" autocomplete="off" />' +
+                '</div>' +
+                '<button type="button" class="btn btn-ghost btn-sm" data-act="refresh">↻ 刷新</button>' +
+                '<button type="button" class="btn btn-sm" data-act="add">＋ 新增</button>' +
                 '<button type="button" class="btn btn-ghost btn-sm" data-act="reset">重置数据</button>' +
                 '</div>';
             const search = bar.querySelector('.crud-search');
@@ -263,14 +304,28 @@ const MockCrudRegistry = (function () {
                 this.keyword = e.target.value.trim().toLowerCase();
                 this.refreshTable();
             });
+            this.countEl = bar.querySelector('[data-total]');
             bar.querySelector('[data-act="add"]').onclick = () => this.openModal();
+            bar.querySelector('[data-act="refresh"]').onclick = async () => {
+                const btn = bar.querySelector('[data-act="refresh"]');
+                btn.disabled = true;
+                try {
+                    await this.store.load();
+                    this.refreshTable();
+                    toast('数据已刷新', true);
+                } catch (e) {
+                    toast(e.message || '刷新失败', false);
+                } finally {
+                    btn.disabled = false;
+                }
+            };
             bar.querySelector('[data-act="reset"]').onclick = async () => {
                 if (!confirm('确定恢复为初始种子数据？')) return;
                 try {
                     await this.store.reset();
                     this.refreshTable();
                 } catch (e) {
-                    alert(e.message || '重置失败');
+                    toast(e.message || '重置失败');
                 }
             };
             return bar;
@@ -279,9 +334,12 @@ const MockCrudRegistry = (function () {
         buildTableWrap() {
             const wrap = document.createElement('div');
             wrap.className = 'table-wrap card';
-            wrap.innerHTML = '<table class="data-table"><thead></thead><tbody></tbody></table>';
-            this.tableHead = wrap.querySelector('thead');
-            this.tableBody = wrap.querySelector('tbody');
+            const scroll = document.createElement('div');
+            scroll.className = 'table-scroll';
+            scroll.innerHTML = '<table class="data-table"><thead></thead><tbody></tbody></table>';
+            wrap.appendChild(scroll);
+            this.tableHead = scroll.querySelector('thead');
+            this.tableBody = scroll.querySelector('tbody');
             return wrap;
         }
 
@@ -339,9 +397,12 @@ const MockCrudRegistry = (function () {
             headHtml += '<th style="width:140px">操作</th></tr>';
             this.tableHead.innerHTML = headHtml;
 
+            const all = this.store.list();
             const rows = this.filteredRows();
+            if (this.countEl) this.countEl.textContent = '共 ' + all.length + ' 条';
             if (!rows.length) {
-                this.tableBody.innerHTML = '<tr><td colspan="' + (cols.length + 1) + '" class="empty-cell">暂无数据</td></tr>';
+                const msg = this.keyword ? '没有匹配的记录' : '暂无数据，点击「新增」创建记录';
+                this.tableBody.innerHTML = '<tr><td colspan="' + (cols.length + 1) + '" class="empty-cell"><span class="empty-state-icon">📭</span>' + escapeHtml(msg) + '</td></tr>';
                 return;
             }
             let bodyHtml = '';
@@ -349,8 +410,11 @@ const MockCrudRegistry = (function () {
             rows.forEach((r) => {
                 bodyHtml += '<tr>';
                 cols.forEach((c) => {
-                    let val = c.render ? c.render(r) : (r[c.key] != null ? r[c.key] : '');
-                    bodyHtml += '<td>' + escapeHtml(String(val)) + '</td>';
+                    let cell;
+                    if (c.renderHtml) cell = c.renderHtml(r);
+                    else if (c.render) cell = escapeHtml(String(c.render(r)));
+                    else cell = escapeHtml(r[c.key] != null ? String(r[c.key]) : '—');
+                    bodyHtml += '<td>' + cell + '</td>';
                 });
                 bodyHtml += '<td class="actions">' +
                     '<button type="button" class="btn-link" data-edit="' + r.id + '">编辑</button>' +
@@ -368,8 +432,9 @@ const MockCrudRegistry = (function () {
                     try {
                         await self.store.remove(id);
                         self.refreshTable();
+                        toast('已删除', true);
                     } catch (e) {
-                        alert(e.message || '删除失败');
+                        toast(e.message || '删除失败', false);
                     }
                 };
             });
@@ -399,9 +464,13 @@ const MockCrudRegistry = (function () {
             });
             this.formEl.innerHTML = html;
             this.modal.hidden = false;
+            document.body.classList.add('modal-open');
+            requestAnimationFrame(() => this.modal.classList.add('is-visible'));
         }
 
         closeModal() {
+            this.modal.classList.remove('is-visible');
+            document.body.classList.remove('modal-open');
             this.modal.hidden = true;
             this.editingId = null;
         }
@@ -433,13 +502,15 @@ const MockCrudRegistry = (function () {
             try {
                 if (this.editingId) {
                     await this.store.update(this.editingId, data);
+                    toast('保存成功', true);
                 } else {
                     await this.store.create(data);
+                    toast('新增成功', true);
                 }
                 this.closeModal();
                 this.refreshTable();
             } catch (e) {
-                alert(e.message || '保存失败');
+                toast(e.message || '保存失败', false);
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -472,7 +543,7 @@ const MockCrudRegistry = (function () {
                 instances[key].store.load().then(function () {
                     instances[key].refreshTable();
                 }).catch(function (e) {
-                    alert(e.message || '刷新失败');
+                    toast(e.message || '刷新失败');
                 });
             }
         }

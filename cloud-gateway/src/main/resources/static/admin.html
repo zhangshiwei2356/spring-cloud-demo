@@ -4,6 +4,8 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>管理后台 · Spring Cloud Demo</title>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/themes.css"/>
     <link rel="stylesheet" href="/css/app.css"/>
 </head>
 <body>
@@ -41,6 +43,7 @@
         <header class="topbar">
             <div class="topbar-title" id="pageTitle">工作台</div>
             <div class="user-bar">
+                <div id="themeMount" class="theme-mount"></div>
                 <div class="user-meta">
                     <div class="name" id="headerUserName">-</div>
                     <span class="role" id="headerRole">-</span>
@@ -131,7 +134,7 @@
                 </div>
             </section>
 
-            <section class="card page-api-output">
+            <section class="card page-api-output" style="margin-top:0">
                 <h2>接口响应（微服务联调）</h2>
                 <pre id="output" class="output">{}</pre>
             </section>
@@ -144,6 +147,9 @@
 <script>
 (function () {
     if (!AppSession.requireAuth()) return;
+
+    AppTheme.init();
+    AppTheme.mountPicker(document.getElementById('themeMount'));
 
     const user = AppSession.getUser();
     const $ = (id) => document.getElementById(id);
