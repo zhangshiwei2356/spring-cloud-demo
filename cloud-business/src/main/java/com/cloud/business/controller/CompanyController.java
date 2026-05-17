@@ -38,6 +38,11 @@ public class CompanyController extends BaseController<CompanySaveDTO, CompanyVO>
         return ok(companyService.listAll());
     }
 
+    /**
+     *  公司详情
+     * @param id 公司ID
+     * @return 公司详情
+     */
     @GetMapping("/{id}")
     @Operation(summary = "公司详情")
     public Result<CompanyVO> get(@PathVariable("id") Long id) {
