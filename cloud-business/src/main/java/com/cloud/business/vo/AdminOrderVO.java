@@ -1,8 +1,13 @@
-package com.cloud.business.demo.entity;
+package com.cloud.business.vo;
 
-import com.cloud.business.demo.Identifiable;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public class DemoOrderRecord implements Identifiable {
+import java.io.Serializable;
+
+@Schema(description = "管理中心订单")
+public class AdminOrderVO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private String orderNo;
@@ -14,12 +19,13 @@ public class DemoOrderRecord implements Identifiable {
     private String status;
     private String createTime;
 
-    @Override
+    public AdminOrderVO() {
+    }
+
     public Long getId() {
         return id;
     }
 
-    @Override
     public void setId(Long id) {
         this.id = id;
     }

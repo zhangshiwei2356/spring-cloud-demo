@@ -1,5 +1,6 @@
-package com.cloud.business.demo;
+package com.cloud.business.persistence.json;
 
+import com.cloud.business.common.Identifiable;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,6 +32,10 @@ public class JsonFileRepository<T extends Identifiable> {
         if (!Files.exists(dataFile)) {
             saveAll(new ArrayList<>());
         }
+    }
+
+    public Path dataFilePath() {
+        return dataFile;
     }
 
     public synchronized List<T> findAll() throws IOException {

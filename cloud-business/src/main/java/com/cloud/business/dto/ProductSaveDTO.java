@@ -1,25 +1,28 @@
-package com.cloud.business.demo.entity;
+package com.cloud.business.dto;
 
-import com.cloud.business.demo.Identifiable;
+import jakarta.validation.constraints.NotBlank;
 
-public class ProductRecord implements Identifiable {
+import java.io.Serializable;
 
-    private Long id;
+public class ProductSaveDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @NotBlank(message = "SKU 编码不能为空")
     private String code;
+
+    @NotBlank(message = "产品名称不能为空")
     private String name;
+
     private String category;
+
+    @NotBlank(message = "单价不能为空")
     private String price;
+
     private Integer stock;
     private String status;
 
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(Long id) {
-        this.id = id;
+    public ProductSaveDTO() {
     }
 
     public String getCode() {

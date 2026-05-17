@@ -1,8 +1,13 @@
-package com.cloud.business.demo.entity;
+package com.cloud.business.vo;
 
-import com.cloud.business.demo.Identifiable;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public class DepartmentRecord implements Identifiable {
+import java.io.Serializable;
+
+@Schema(description = "部门信息")
+public class DepartmentVO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private String companyName;
@@ -11,12 +16,13 @@ public class DepartmentRecord implements Identifiable {
     private String phone;
     private String status;
 
-    @Override
+    public DepartmentVO() {
+    }
+
     public Long getId() {
         return id;
     }
 
-    @Override
     public void setId(Long id) {
         this.id = id;
     }

@@ -2,7 +2,7 @@
  * 管理中心 CRUD：数据持久化在 cloud-business 模块 data/demo/*.json。
  */
 const MockCrudRegistry = (function () {
-    const API_DEMO_BASE = '/cloud-business/api/demo';
+    const API_STORAGE_PATH = '/cloud-business/api/business/storage-path';
 
     const STATUS_OPTIONS = [
         { value: '1', label: '启用' },
@@ -26,7 +26,8 @@ const MockCrudRegistry = (function () {
         company: {
             title: '公司管理',
             hint: '数据保存在 cloud-business 目录 data/demo/companies.json',
-            apiResource: 'companies',
+            apiBase: '/cloud-business/api/companies',
+            dataFile: 'companies.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -48,7 +49,8 @@ const MockCrudRegistry = (function () {
         department: {
             title: '部门管理',
             hint: '数据保存在 data/demo/departments.json',
-            apiResource: 'departments',
+            apiBase: '/cloud-business/api/departments',
+            dataFile: 'departments.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -69,7 +71,8 @@ const MockCrudRegistry = (function () {
         userMgmt: {
             title: '用户管理',
             hint: '数据保存在 data/demo/users.json',
-            apiResource: 'users',
+            apiBase: '/cloud-business/api/admin/users',
+            dataFile: 'users.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -96,7 +99,8 @@ const MockCrudRegistry = (function () {
         productMgmt: {
             title: '产品管理',
             hint: '数据保存在 data/demo/products.json',
-            apiResource: 'products',
+            apiBase: '/cloud-business/api/products',
+            dataFile: 'products.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -119,7 +123,8 @@ const MockCrudRegistry = (function () {
         orderMgmt: {
             title: '订单管理',
             hint: '数据保存在 data/demo/orders.json（与真实下单 API 独立）',
-            apiResource: 'orders',
+            apiBase: '/cloud-business/api/admin/orders',
+            dataFile: 'orders.json',
             idField: 'id',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
@@ -147,14 +152,14 @@ const MockCrudRegistry = (function () {
     class ApiStore {
         constructor(config) {
             this.config = config;
-            this.apiBase = API_DEMO_BASE + '/' + config.apiResource;
+            this.apiBase = config.apiBase;
             this.rows = [];
             this.storagePath = '';
         }
 
         async fetchStoragePath() {
             try {
-                const res = await apiRequest('GET', API_DEMO_BASE + '/storage-path', null, true);
+                const res = await apiRequest('GET', API_STORAGE_PATH, null, true);
                 if (res.code === 200 && res.data) {
                     this.storagePath = res.data;
                 }
@@ -246,7 +251,7 @@ const MockCrudRegistry = (function () {
             const bar = document.createElement('div');
             bar.className = 'crud-toolbar';
             const pathHint = this.store.storagePath
-                ? '存储路径：' + this.store.storagePath + '/' + this.config.apiResource + '.json'
+                ? '存储路径：' + this.store.storagePath + '/' + this.config.dataFile
                 : this.config.hint;
             bar.innerHTML =
                 '<div class="crud-toolbar-left">' +

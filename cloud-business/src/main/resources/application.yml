@@ -42,7 +42,7 @@ cloud:
       secret: cloud-demo-jwt-signing-secret-min-32-bytes-required-for-hs256-xx
   business:
     demo:
-      # 演示 CRUD 数据目录（相对 business 启动工作目录）
+      # 业务 JSON 数据目录（相对 business 启动工作目录，接入 MySQL 后可移除）
       data-dir: ./data/demo
 
 springdoc:
