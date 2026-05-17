@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>管理后台 · Spring Cloud Demo</title>
-    <script src="/js/theme.js"></script>
+    <script src="/js/theme.js?v=2"></script>
     <link rel="stylesheet" href="/css/themes.css"/>
     <link rel="stylesheet" href="/css/app.css"/>
 </head>
@@ -148,7 +148,6 @@
 (function () {
     if (!AppSession.requireAuth()) return;
 
-    AppTheme.init();
     AppTheme.mountPicker(document.getElementById('themeMount'));
 
     const user = AppSession.getUser();
