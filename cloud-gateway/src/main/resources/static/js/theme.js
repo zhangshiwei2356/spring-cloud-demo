@@ -14,32 +14,47 @@ const AppTheme = (function () {
         { id: 'light', label: '浅色', swatch: ['#f1f5f9', '#2563eb'] }
     ];
 
+    /** @type {Array<(id: string) => void>} */
+    const syncHandlers = [];
+
+    function themeLabel(id) {
+        const t = THEMES.find(function (x) { return x.id === id; });
+        return t ? t.label : id;
+    }
+
+    function isValidTheme(id) {
+        return THEMES.some(function (t) { return t.id === id; });
+    }
+
     function get() {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved && THEMES.some((t) => t.id === saved)) {
+            if (saved && isValidTheme(saved)) {
                 return saved;
             }
         } catch (e) { /* ignore */ }
         return DEFAULT;
     }
 
-    function apply(themeId) {
-        const id = THEMES.some((t) => t.id === themeId) ? themeId : DEFAULT;
-        document.documentElement.setAttribute('data-theme', id);
-        try {
-            localStorage.setItem(STORAGE_KEY, id);
-        } catch (e) { /* ignore */ }
-        document.querySelectorAll('[data-theme-option]').forEach(function (btn) {
+    function syncPicker(root, id) {
+        const labelEl = root.querySelector('[data-theme-current-label]');
+        if (labelEl) {
+            labelEl.textContent = themeLabel(id);
+        }
+        root.querySelectorAll('[data-theme-option]').forEach(function (btn) {
             const active = btn.getAttribute('data-theme-option') === id;
             btn.classList.toggle('is-active', active);
             btn.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
-        const labelEl = document.querySelector('[data-theme-current-label]');
-        if (labelEl) {
-            const t = THEMES.find((x) => x.id === id);
-            labelEl.textContent = t ? t.label : id;
-        }
+    }
+
+    function apply(themeId) {
+        const id = isValidTheme(themeId) ? themeId : DEFAULT;
+        document.documentElement.setAttribute('data-theme', id);
+        try {
+            localStorage.setItem(STORAGE_KEY, id);
+        } catch (e) { /* ignore */ }
+        syncHandlers.forEach(function (fn) { fn(id); });
         return id;
     }
 
@@ -49,23 +64,27 @@ const AppTheme = (function () {
 
     function mountPicker(root) {
         if (!root) return;
+
         const current = get();
-        const currentTheme = THEMES.find((t) => t.id === current);
         let html = '<div class="theme-switcher">';
         html += '<button type="button" class="btn btn-ghost btn-sm theme-trigger" data-theme-trigger aria-haspopup="true" aria-expanded="false">';
         html += '<span class="theme-trigger-icon" aria-hidden="true">◐</span>';
-        html += '<span data-theme-current-label">' + (currentTheme ? currentTheme.label : '主题') + '</span>';
+        html += '<span data-theme-current-label">' + themeLabel(current) + '</span>';
         html += '</button>';
         html += '<div class="theme-panel" data-theme-panel hidden>';
         html += '<p class="theme-panel-title">主题背景</p><div class="theme-grid">';
         THEMES.forEach(function (t) {
-            const active = t.id === current ? ' is-active' : '';
-            html += '<button type="button" class="theme-option' + active + '" data-theme-option="' + t.id + '" aria-pressed="' + (active ? 'true' : 'false') + '">';
+            const active = t.id === current;
+            html += '<button type="button" class="theme-option' + (active ? ' is-active' : '') + '" data-theme-option="' + t.id + '" aria-pressed="' + (active ? 'true' : 'false') + '">';
             html += '<span class="theme-swatch" style="background:linear-gradient(135deg,' + t.swatch[0] + ' 50%,' + t.swatch[1] + ' 50%)"></span>';
             html += '<span class="theme-option-label">' + t.label + '</span></button>';
         });
         html += '</div></div></div>';
         root.innerHTML = html;
+
+        const syncUi = function (id) { syncPicker(root, id); };
+        syncHandlers.push(syncUi);
+        apply(get());
 
         const trigger = root.querySelector('[data-theme-trigger]');
         const panel = root.querySelector('[data-theme-panel]');
@@ -106,7 +125,7 @@ const AppTheme = (function () {
 (function () {
     try {
         const saved = localStorage.getItem('sc_demo_theme');
-        if (saved) {
+        if (saved && AppTheme.THEMES.some(function (t) { return t.id === saved; })) {
             document.documentElement.setAttribute('data-theme', saved);
         }
     } catch (e) { /* ignore */ }

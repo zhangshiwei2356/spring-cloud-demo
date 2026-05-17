@@ -148,7 +148,6 @@
 (function () {
     if (!AppSession.requireAuth()) return;
 
-    AppTheme.init();
     AppTheme.mountPicker(document.getElementById('themeMount'));
 
     const user = AppSession.getUser();
