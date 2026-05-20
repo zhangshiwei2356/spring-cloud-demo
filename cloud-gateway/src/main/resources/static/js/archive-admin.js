@@ -49,6 +49,38 @@ const ArchiveAdmin = (function () {
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    function escapeAttr(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
+    }
+
+    /** 从 Content-Disposition 解析文件名（支持 filename*=UTF-8''） */
+    function parseFilenameFromDisposition(disp) {
+        if (!disp) return null;
+        const star = /filename\*=(?:UTF-8''|utf-8'')([^;\n]+)/i.exec(disp);
+        if (star) {
+            try {
+                return decodeURIComponent(star[1].trim().replace(/^["']|["']$/g, ''));
+            } catch (e) {
+                return star[1].trim();
+            }
+        }
+        const quoted = /filename=["']([^"']+)["']/i.exec(disp);
+        if (quoted) return quoted[1];
+        const plain = /filename=([^;\n]+)/i.exec(disp);
+        if (plain) {
+            const name = plain[1].trim().replace(/^["']|["']$/g, '');
+            try {
+                return decodeURIComponent(name);
+            } catch (e) {
+                return name;
+            }
+        }
+        return null;
+    }
+
     return {
         mount: function (root) {
             root.innerHTML =
@@ -85,8 +117,15 @@ const ArchiveAdmin = (function () {
             const form = root.querySelector('#archiveForm');
             const fileInput = root.querySelector('#archiveFileInput');
             const uploadLabel = root.querySelector('#archiveUploadLabel');
+            const fieldTitle = form.querySelector('[name="title"]');
+            const fieldCategory = form.querySelector('[name="category"]');
+            const fieldDescription = form.querySelector('[name="description"]');
             let editingId = null;
             let pendingUpload = false;
+
+            function showError(err) {
+                alert((err && err.message) ? err.message : '操作失败');
+            }
 
             async function refresh() {
                 try {
@@ -113,7 +152,8 @@ const ArchiveAdmin = (function () {
                         '<button type="button" class="btn-link" data-edit="' + r.id + '">编辑</button>' +
                         '<button type="button" class="btn-link" data-upload="' + r.id + '">上传</button>';
                     if (r.storedFileName) {
-                        html += '<button type="button" class="btn-link" data-dl="' + r.id + '">下载</button>';
+                        html += '<button type="button" class="btn-link" data-dl="' + r.id + '" data-filename="' +
+                            escapeAttr(r.originalFileName || '') + '">下载</button>';
                         if (r.fileType === 'IMAGE') {
                             html += '<button type="button" class="btn-link" data-preview="' + r.id + '">预览</button>';
                         }
@@ -122,39 +162,60 @@ const ArchiveAdmin = (function () {
                         '</td></tr>';
                 });
                 tbody.innerHTML = html;
-                bindRowActions();
             }
 
-            function bindRowActions() {
-                tbody.querySelectorAll('[data-edit]').forEach(function (btn) {
-                    btn.onclick = function () { openEdit(Number(btn.getAttribute('data-edit'))); };
-                });
-                tbody.querySelectorAll('[data-upload]').forEach(function (btn) {
-                    btn.onclick = function () { openUpload(Number(btn.getAttribute('data-upload'))); };
-                });
-                tbody.querySelectorAll('[data-dl]').forEach(function (btn) {
-                    btn.onclick = function () { downloadFile(Number(btn.getAttribute('data-dl'))); };
-                });
-                tbody.querySelectorAll('[data-preview]').forEach(function (btn) {
-                    btn.onclick = function () { previewImage(Number(btn.getAttribute('data-preview'))); };
-                });
-                tbody.querySelectorAll('[data-del]').forEach(function (btn) {
-                    btn.onclick = async function () {
-                        if (!confirm('确定删除该档案及文件？')) return;
-                        await apiJson('DELETE', '/' + btn.getAttribute('data-del'));
-                        refresh();
-                    };
-                });
-            }
+            tbody.addEventListener('click', function (e) {
+                const editBtn = e.target.closest('[data-edit]');
+                if (editBtn) {
+                    e.preventDefault();
+                    openEdit(Number(editBtn.getAttribute('data-edit'))).catch(showError);
+                    return;
+                }
+                const uploadBtn = e.target.closest('[data-upload]');
+                if (uploadBtn) {
+                    e.preventDefault();
+                    openUpload(Number(uploadBtn.getAttribute('data-upload')));
+                    return;
+                }
+                const dlBtn = e.target.closest('[data-dl]');
+                if (dlBtn) {
+                    e.preventDefault();
+                    downloadFile(
+                        Number(dlBtn.getAttribute('data-dl')),
+                        dlBtn.getAttribute('data-filename') || ''
+                    ).catch(showError);
+                    return;
+                }
+                const previewBtn = e.target.closest('[data-preview]');
+                if (previewBtn) {
+                    e.preventDefault();
+                    previewImage(Number(previewBtn.getAttribute('data-preview'))).catch(showError);
+                    return;
+                }
+                const delBtn = e.target.closest('[data-del]');
+                if (delBtn) {
+                    e.preventDefault();
+                    if (!confirm('确定删除该档案及文件？')) return;
+                    apiJson('DELETE', '/' + delBtn.getAttribute('data-del'))
+                        .then(refresh)
+                        .catch(showError);
+                }
+            });
 
             function openModal(title, showUpload) {
                 root.querySelector('#archiveModalTitle').textContent = title;
                 uploadLabel.style.display = showUpload ? 'block' : 'none';
                 fileInput.style.display = showUpload ? 'block' : 'none';
                 modal.hidden = false;
+                document.body.classList.add('modal-open');
+                requestAnimationFrame(function () {
+                    modal.classList.add('is-visible');
+                });
             }
 
             function closeModal() {
+                modal.classList.remove('is-visible');
+                document.body.classList.remove('modal-open');
                 modal.hidden = true;
                 editingId = null;
                 pendingUpload = false;
@@ -173,9 +234,9 @@ const ArchiveAdmin = (function () {
                 const r = await apiJson('GET', '/' + id);
                 editingId = id;
                 pendingUpload = false;
-                form.title.value = r.title || '';
-                form.category.value = r.category || '';
-                form.description.value = r.description || '';
+                fieldTitle.value = r.title || '';
+                fieldCategory.value = r.category || '';
+                fieldDescription.value = r.description || '';
                 openModal('编辑档案', false);
             }
 
@@ -186,16 +247,16 @@ const ArchiveAdmin = (function () {
                 openModal('上传文件', true);
             }
 
-            async function downloadFile(id) {
+            async function downloadFile(id, preferredName) {
                 const res = await fetch(API + '/' + id + '/file', { headers: authHeaders() });
                 if (!res.ok) {
                     throw new Error('下载失败 HTTP ' + res.status);
                 }
                 const blob = await res.blob();
                 const disp = res.headers.get('Content-Disposition') || '';
-                let name = 'download';
-                const m = /filename="?([^";]+)"?/.exec(disp);
-                if (m) name = decodeURIComponent(m[1]);
+                let name = (preferredName && preferredName.trim())
+                    || parseFilenameFromDisposition(disp)
+                    || 'download';
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -218,9 +279,9 @@ const ArchiveAdmin = (function () {
             form.onsubmit = async function (e) {
                 e.preventDefault();
                 const body = {
-                    title: form.title.value.trim(),
-                    category: form.category.value.trim(),
-                    description: form.description.value.trim()
+                    title: fieldTitle.value.trim(),
+                    category: fieldCategory.value.trim(),
+                    description: fieldDescription.value.trim()
                 };
                 try {
                     let record;
@@ -252,7 +313,7 @@ const ArchiveAdmin = (function () {
                         previewImage(record.id);
                     }
                 } catch (err) {
-                    alert(err.message || '操作失败');
+                    showError(err);
                 }
             };
 
