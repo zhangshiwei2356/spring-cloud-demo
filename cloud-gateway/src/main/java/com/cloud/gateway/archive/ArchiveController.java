@@ -2,6 +2,7 @@ package com.cloud.gateway.archive;
 
 import com.cloud.common.domain.Result;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -74,11 +76,14 @@ public class ArchiveController {
                         .map(resource -> {
                             String filename = record.getOriginalFileName() != null
                                     ? record.getOriginalFileName() : "download";
+                            filename = filename.replace("\\", "_").replace("/", "_");
+                            ContentDisposition disposition = ContentDisposition.attachment()
+                                    .filename(filename, StandardCharsets.UTF_8)
+                                    .build();
                             String contentType = record.getContentType() != null
                                     ? record.getContentType() : MediaType.APPLICATION_OCTET_STREAM_VALUE;
                             return ResponseEntity.ok()
-                                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                                            "attachment; filename=\"" + filename + "\"")
+                                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
                                     .contentType(MediaType.parseMediaType(contentType))
                                     .body(resource);
                         }));

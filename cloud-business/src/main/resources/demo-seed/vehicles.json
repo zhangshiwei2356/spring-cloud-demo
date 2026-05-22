@@ -1,0 +1,67 @@
+[
+  {
+    "id": 1,
+    "code": "CAR-001",
+    "name": "特斯拉 Model 3",
+    "brand": "特斯拉",
+    "model": "Model 3 后驱版",
+    "price": "259900.00",
+    "color": "珍珠白",
+    "fuelType": "纯电",
+    "stock": 8,
+    "status": "1",
+    "description": "零百加速 6.1s，CLTC 续航 606km，支持 OTA 升级。"
+  },
+  {
+    "id": 2,
+    "code": "CAR-002",
+    "name": "比亚迪 汉 EV",
+    "brand": "比亚迪",
+    "model": "汉 EV 冠军版",
+    "price": "189800.00",
+    "color": "苍穹灰",
+    "fuelType": "纯电",
+    "stock": 12,
+    "status": "1",
+    "description": "刀片电池，DiPilot 智能驾驶辅助，豪华中大型轿车。"
+  },
+  {
+    "id": 3,
+    "code": "CAR-003",
+    "name": "理想 L7",
+    "brand": "理想",
+    "model": "L7 Pro",
+    "price": "328000.00",
+    "color": "深海绿",
+    "fuelType": "增程",
+    "stock": 5,
+    "status": "1",
+    "description": "家庭五座 SUV，增程无里程焦虑，超大后排空间。"
+  },
+  {
+    "id": 4,
+    "code": "CAR-004",
+    "name": "大众 ID.4",
+    "brand": "大众",
+    "model": "ID.4 X 纯净版",
+    "price": "156800.00",
+    "color": "星辰蓝",
+    "fuelType": "纯电",
+    "stock": 15,
+    "status": "1",
+    "description": "MEB 平台纯电 SUV，德系驾控，城市通勤优选。"
+  },
+  {
+    "id": 5,
+    "code": "CAR-005",
+    "name": "宝马 i3",
+    "brand": "宝马",
+    "model": "i3 eDrive35L",
+    "price": "219900.00",
+    "color": "矿石白",
+    "fuelType": "纯电",
+    "stock": 6,
+    "status": "1",
+    "description": "豪华纯电轿车，后驱驾趣，BMW 智能座舱。"
+  }
+]

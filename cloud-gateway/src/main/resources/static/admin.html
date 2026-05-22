@@ -25,6 +25,7 @@
             <button type="button" class="nav-item" data-page="userMgmt"><span class="icon">👥</span>用户管理</button>
             <button type="button" class="nav-item" data-page="productMgmt"><span class="icon">📦</span>产品管理</button>
             <button type="button" class="nav-item" data-page="orderMgmt"><span class="icon">📋</span>订单管理</button>
+            <button type="button" class="nav-item" data-page="vehiclePurchase"><span class="icon">🚗</span>车辆购买</button>
             <button type="button" class="nav-item" data-page="archive"><span class="icon">🗂️</span>档案管理</button>
 
             <div class="nav-group">微服务联调</div>
@@ -72,6 +73,7 @@
                     <h3>快捷入口</h3>
                     <button type="button" class="btn" data-goto="orderMgmt">订单管理</button>
                     <button type="button" class="btn btn-ghost" data-goto="productMgmt" style="margin-left:0.5rem">产品管理</button>
+                    <button type="button" class="btn btn-ghost" data-goto="vehiclePurchase" style="margin-left:0.5rem">车辆购买</button>
                     <button type="button" class="btn btn-ghost" data-goto="api-order" style="margin-left:0.5rem">提交真实订单</button>
                 </div>
             </section>
@@ -81,6 +83,7 @@
             <section id="page-userMgmt" class="page"><div id="crud-userMgmt"></div></section>
             <section id="page-productMgmt" class="page"><div id="crud-productMgmt"></div></section>
             <section id="page-orderMgmt" class="page"><div id="crud-orderMgmt"></div></section>
+            <section id="page-vehiclePurchase" class="page"><div id="vehiclePurchaseRoot"></div></section>
             <section id="page-archive" class="page"><div id="crud-archive"></div></section>
 
             <section id="page-api-user" class="page page-api">
@@ -142,8 +145,9 @@
     </div>
 </div>
 <script src="/js/app.js"></script>
-<script src="/js/mock-crud.js"></script>
-<script src="/js/archive-admin.js"></script>
+<script src="/js/mock-crud.js?v=2"></script>
+<script src="/js/archive-admin.js?v=3"></script>
+<script src="/js/vehicle-purchase.js?v=3"></script>
 <script>
 (function () {
     if (!AppSession.requireAuth()) return;
@@ -163,6 +167,7 @@
         userMgmt: '用户管理',
         productMgmt: '产品管理',
         orderMgmt: '订单管理',
+        vehiclePurchase: '车辆购买',
         archive: '档案管理',
         'api-user': '用户查询 API',
         'api-product': '商品询价 API',
@@ -201,6 +206,12 @@
         if (CRUD_PAGES.indexOf(name) >= 0) {
             const root = $('crud-' + name);
             if (root) MockCrudRegistry.mount(name, root);
+        }
+        if (name === 'vehiclePurchase') {
+            const vpRoot = $('vehiclePurchaseRoot');
+            if (vpRoot && typeof VehiclePurchase !== 'undefined') {
+                VehiclePurchase.mount(vpRoot);
+            }
         }
         if (name === 'archive') {
             const root = $('crud-archive');
@@ -267,6 +278,8 @@
             renderJson(output, e.message, true);
         }
     };
+
+    window.switchPage = switchPage;
 
     initProfile();
     document.querySelector('.page-api-output').style.display = 'none';

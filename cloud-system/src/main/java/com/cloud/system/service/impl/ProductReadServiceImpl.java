@@ -26,6 +26,11 @@ public class ProductReadServiceImpl extends BaseService<ProductPriceQueryDTO, Pr
         DEMO_PRICE.put("SKU-PHONE", new BigDecimal("3999.00"));
         DEMO_PRICE.put("SKU-BOOK", new BigDecimal("59.90"));
         DEMO_PRICE.put("SKU-DEMO", new BigDecimal("9.99"));
+        DEMO_PRICE.put("CAR-001", new BigDecimal("259900.00"));
+        DEMO_PRICE.put("CAR-002", new BigDecimal("189800.00"));
+        DEMO_PRICE.put("CAR-003", new BigDecimal("328000.00"));
+        DEMO_PRICE.put("CAR-004", new BigDecimal("156800.00"));
+        DEMO_PRICE.put("CAR-005", new BigDecimal("219900.00"));
     }
 
     @Override

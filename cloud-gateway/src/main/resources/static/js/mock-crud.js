@@ -152,6 +152,8 @@ const MockCrudRegistry = (function () {
             apiBase: '/cloud-business/api/admin/orders',
             dataFile: 'orders.json',
             idField: 'id',
+            enableView: true,
+            actionWidth: '200px',
             columns: [
                 { key: 'id', label: 'ID', width: '60px' },
                 { key: 'orderNo', label: '订单号' },
@@ -394,7 +396,8 @@ const MockCrudRegistry = (function () {
             cols.forEach((c) => {
                 headHtml += '<th' + (c.width ? ' style="width:' + c.width + '"' : '') + '>' + c.label + '</th>';
             });
-            headHtml += '<th style="width:140px">操作</th></tr>';
+            const actionWidth = this.config.actionWidth || '140px';
+            headHtml += '<th style="width:' + actionWidth + '">操作</th></tr>';
             this.tableHead.innerHTML = headHtml;
 
             const all = this.store.list();
@@ -416,12 +419,20 @@ const MockCrudRegistry = (function () {
                     else cell = escapeHtml(r[c.key] != null ? String(r[c.key]) : '—');
                     bodyHtml += '<td>' + cell + '</td>';
                 });
-                bodyHtml += '<td class="actions">' +
-                    '<button type="button" class="btn-link" data-edit="' + r.id + '">编辑</button>' +
+                bodyHtml += '<td class="actions">';
+                if (self.config.enableView) {
+                    bodyHtml += '<button type="button" class="btn-link" data-view="' + r.id + '">查看</button>';
+                }
+                bodyHtml += '<button type="button" class="btn-link" data-edit="' + r.id + '">编辑</button>' +
                     '<button type="button" class="btn-link danger" data-del="' + r.id + '">删除</button>' +
                     '</td></tr>';
             });
             this.tableBody.innerHTML = bodyHtml;
+            if (self.config.enableView) {
+                this.tableBody.querySelectorAll('[data-view]').forEach((btn) => {
+                    btn.onclick = () => openOrderDetail(btn.getAttribute('data-view'));
+                });
+            }
             this.tableBody.querySelectorAll('[data-edit]').forEach((btn) => {
                 btn.onclick = () => self.openModal(btn.getAttribute('data-edit'));
             });
@@ -530,7 +541,17 @@ const MockCrudRegistry = (function () {
 
     const instances = {};
 
+    function openOrderDetail(orderId) {
+        if (typeof window.switchPage === 'function') {
+            window.switchPage('vehiclePurchase');
+        }
+        if (typeof VehiclePurchase !== 'undefined' && VehiclePurchase.showOrderDetail) {
+            VehiclePurchase.showOrderDetail(orderId, false);
+        }
+    }
+
     return {
+        openOrderDetail: openOrderDetail,
         mount(key, rootEl) {
             if (!CONFIGS[key]) return;
             if (!instances[key]) {
